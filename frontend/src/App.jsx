@@ -123,7 +123,7 @@ function App() {
             {/* canvas */}
             <Canvas 
               style={{backgroundColor: "rgba(0,0,0,1)", height: canvasDimensions}}
-              camera={{position: [300,100,100], fov: 60}}
+              camera={{position: [400,50,0], fov: 60}}
               > 
 
 
