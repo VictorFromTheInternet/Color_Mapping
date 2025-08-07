@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect} from 'react'
 import './App.css'
 import LoadingSpinner from './components/LoadingSpinner'
 import { Canvas } from '@react-three/fiber'
@@ -11,13 +11,14 @@ function App() {
   const [numColors, setNumColors] = useState(1)    
   const [isLoading, setIsLoading] = useState(false)
   const canvasRef = useRef()
+  const [canvasDimensions, setCanvasDimensions] = useState(0)
 
   const [xValue, setXValue] = useState(0)
   const [yValue, setYValue] = useState(0)
   const cubeRef = useRef()
-  const [cubeHeight, setCubeHeight] = useState(2)
-  const [cubeWidth, setCubeWidth] = useState(2)
-  const [cubeDepth, setCubeDepth] = useState(2)
+  const [cubeHeight, setCubeHeight] = useState(255)
+  const [cubeWidth, setCubeWidth] = useState(255)
+  const [cubeDepth, setCubeDepth] = useState(255)
   
   
 
@@ -47,13 +48,26 @@ function App() {
   }
 
 
-  // handle x y coordinates
-  function updateCoordinates(xValue, yValue){
+  // Canvas Responsiveness
+  useEffect(()=>{
 
-    useFrame(({ clock }) => {
-      myMesh.current.rotation.x = clock.elapsedTime
-    })
-  }
+    function updateCanvasSize(){
+      const sideLength = Math.min(window.innerHeight /2, window.innerWidth /2)
+      setCanvasDimensions(sideLength)
+    }    
+    updateCanvasSize()
+
+
+    window.addEventListener('resize', updateCanvasSize)
+
+
+
+    // add event listener
+    return ()=>{
+      window.removeEventListener(resizeBy, updateCanvasSize)
+    }
+
+  },[])
 
 
   return (
@@ -107,9 +121,15 @@ function App() {
             </form>
 
             {/* canvas */}
-            <Canvas style={{backgroundColor: "rgba(0,0,0,1)"}}>              
+            <Canvas 
+              style={{backgroundColor: "rgba(0,0,0,1)", height: canvasDimensions}}
+              camera={{position: [300,100,100], fov: 60}}
+              > 
+
+
               <ambientLight intensity={0.1}/>
-              <directionalLight color="red" position={[0, 0, 5]} />
+              
+              <directionalLight color="red" position={[300, 300, 300]} />
               <Cube 
                   height={cubeHeight} 
                   width={cubeWidth} 
