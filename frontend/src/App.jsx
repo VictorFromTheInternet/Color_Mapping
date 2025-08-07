@@ -136,7 +136,9 @@ function App() {
                   depth={cubeDepth} 
                   ref={cubeRef} 
                   xRotation={(xValue * Math.PI) / 180} 
-                  yRotation={(yValue * Math.PI) / 180} />
+                  yRotation={(yValue * Math.PI) / 180} 
+                  colors={colorInputs}
+                  />
               <meshStandardMaterial wireframe/>              
             </Canvas>  
 
