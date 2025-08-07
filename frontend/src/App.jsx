@@ -1,17 +1,24 @@
 import { useState, useRef } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 import LoadingSpinner from './components/LoadingSpinner'
+import { Canvas } from '@react-three/fiber'
+
+import Cube from './components/Cube'
 
 function App() {
 
   const [colorInputs, setColorInputs] = useState([])
-  const [numColors, setNumColors] = useState(1)
-  const [fileInput, setFileInput]  = useState(null)
-  const [processedImageData, setProcessedImageData] = useState()
+  const [numColors, setNumColors] = useState(1)    
   const [isLoading, setIsLoading] = useState(false)
   const canvasRef = useRef()
+
+  const [xValue, setXValue] = useState(0)
+  const [yValue, setYValue] = useState(0)
+  const cubeRef = useRef()
+  const [cubeHeight, setCubeHeight] = useState(2)
+  const [cubeWidth, setCubeWidth] = useState(2)
+  const [cubeDepth, setCubeDepth] = useState(2)
+  
   
 
   // handle colors arr
@@ -38,128 +45,15 @@ function App() {
       setColorInputs(colorInputs.slice(0,n))
     }
   }
-  
 
-  // handle image input
-  function handleImageInput(e){
-    console.log(e.target.files[0]); 
-    setFileInput(e.target.files[0])
 
-    const imageUrl = URL.createObjectURL(e.target.files[0])
-    const img = new Image();
+  // handle x y coordinates
+  function updateCoordinates(xValue, yValue){
 
-    img.onload = () =>{
-      drawOriginalImageOnCanvas(img)
-      URL.revokeObjectURL(imageUrl)
-    }
-    
-    
-    img.src = imageUrl
+    useFrame(({ clock }) => {
+      myMesh.current.rotation.x = clock.elapsedTime
+    })
   }
-  
-
-  // submit
-  function handleSubmit(){
-
-  }
-
-  // generate image
-  async function handleGenerateImage(e){
-    e.preventDefault()
-    setIsLoading(true)
-
-    // Check if form is valid using HTML5 validation
-    const form = e.target.closest('form')
-    if (!form.checkValidity()) {
-      form.reportValidity() // This will show validation messages
-      return
-    }
-
-    // Additional custom validation
-    if (!fileInput) {
-      alert('Please select an image file')
-      return
-    }
-
-    if (colorInputs.length === 0) {
-      alert('Please select at least one color')
-      return
-    }
-
-    const formDataTemp = {
-      colors: colorInputs,
-      inputImage: fileInput
-    }
-    const formData = new FormData()
-    
-    // Object.entries(formDataTemp).forEach(([key,value], index)=>{
-    //   console.log(`${key} : ${value}`)
-    //   formData.append(key,value)
-    // })
-    formData.append('colors', colorInputs)
-    formData.append('inputImage', fileInput)
-
-    try{
-      const ENV = import.meta.env.MODE       
-      const url = (ENV == 'development') ? 
-          'http://localhost:5000/color-reducer-api/reduce-image' :
-          `https://color-reducer-server.onrender.com/color-reducer-api/reduce-image`
-          
-      const options = {
-        method: 'POST',      
-        body: formData
-      }
-      const response = await fetch(url, options)    
-      const data = await response.json()       
-      let imageData = new Uint8ClampedArray(data.imageData.data)
-
-      // console.log(typeof imageData)     
-      // console.log(imageData)      
-
-      // Draw the processed image on canvas
-      drawImageOnCanvas(imageData, data.width, data.height)
-    }catch(err){
-      console.error(err)
-    }finally{
-      setIsLoading(false)
-    }
-
-
-    // console.log(formData)
-    // console.log(data)
-  }
-
-  // Function to draw image data on canvas (buffer data)
-  function drawImageOnCanvas(imageDataArray, width, height) {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    canvas.width = width
-    canvas.height = height
-    const ctx = canvas.getContext('2d')
-    
-    // Create ImageData object from the array
-    const imageData = new ImageData(imageDataArray, width, height)
-    
-    // Draw the image data on canvas
-    ctx.putImageData(imageData, 0, 0)
-  }
-
-  // funtion to draw image on canvas (jpg)
-  function drawOriginalImageOnCanvas(img){
-    const canvas = canvasRef.current
-    if(!canvas) return
-
-    canvas.width = img.width
-    canvas.height = img.height
-
-    const ctx = canvas.getContext("2d")
-    ctx.clearRect(0,0,canvas.width, canvas.height)
-    ctx.drawImage(img,0,0)
-  }
-
-
-
 
 
   return (
@@ -207,42 +101,55 @@ function App() {
                 </div>
               </div>
 
-              <div className="mb-6">
-                <label htmlFor="imageUpload" className="block text-sm sm:text-base mb-2">Upload an Image:</label>
-                <input 
-                  type="file" id="imageUpload" name="imageUpload" accept="image/jpeg"  required
-                  className="w-full text-sm sm:text-base
-                      file:mr-3 file:py-2 file:px-4 file:border file:rounded-md
-                      file:text-xs sm:file:text-sm file:font-medium
-                      file:bg-stone-50 file:text-gray-700
-                      hover:file:cursor-pointer hover:file:bg-blue-50
-                      hover:file:text-blue-500 file:transition-colors"
-                
-                  onChange={(e)=>{ handleImageInput(e)}}
-                  />
-              </div>              
-
-              <button 
-              className="flex gap-2 items-center justify-center w-full sm:w-auto text-blue-500 border border-blue-500 py-3 px-6 rounded-xl cursor-pointer hover:bg-blue-50 transition-colors font-medium text-sm sm:text-base"
-              onClick={handleGenerateImage} disabled={isLoading}> 
-                {isLoading && <LoadingSpinner/>}
-                {isLoading ? 'Loading ...':'Reduce Image'}
-              </button>
+                        
+                  {/* submit btn */}
+              
             </form>
 
-            {
-              fileInput &&
-              <div className="bg-gray-200 my-4 p-4 rounded-lg max-w-full overflow-auto max-w-[70vw] max-h-[50vh]">
-                <canvas 
-                  id="canvas" 
-                  ref={canvasRef} 
-                  className="max-w-full h-auto"
-                  width={fileInput.width} 
-                  height={fileInput.height}
-                ></canvas>
-              </div>
-            }
+            {/* canvas */}
+            <Canvas style={{backgroundColor: "rgba(0,0,0,1)"}}>              
+              <ambientLight intensity={0.1}/>
+              <directionalLight color="red" position={[0, 0, 5]} />
+              <Cube 
+                  height={cubeHeight} 
+                  width={cubeWidth} 
+                  depth={cubeDepth} 
+                  ref={cubeRef} 
+                  xRotation={(xValue * Math.PI) / 180} 
+                  yRotation={(yValue * Math.PI) / 180} />
+              <meshStandardMaterial wireframe/>              
+            </Canvas>  
 
+            <div className="mb-4">
+                <label htmlFor="xValue" className="block text-sm sm:text-base mb-2">X:</label>
+                <div className="flex justify-between text-xs sm:text-sm text-gray-600 mb-1">
+                  <p>0</p>
+                  <p>360</p>
+                </div>
+                <div className="flex gap-3 justify-between items-center">
+                  <input 
+                  type="range" id="numColors" min="0" max="360" onChange={(e)=>{setXValue(e.target.value)}} value={xValue} required
+                  className="flex-1"
+                  />
+                  <span className="text-sm sm:text-base font-medium min-w-[2rem] text-center">{xValue}</span>
+                </div>        
+              </div>       
+
+              <div className="mb-4">
+                <label htmlFor="numColors" className="block text-sm sm:text-base mb-2">Y:</label>
+                <div className="flex justify-between text-xs sm:text-sm text-gray-600 mb-1">
+                  <p>0</p>
+                  <p>360</p>
+                </div>
+                <div className="flex gap-3 justify-between items-center">
+                  <input 
+                  type="range" id="numColors" min="0" max="360" onChange={(e)=>{setYValue(e.target.value)}} value={yValue} required
+                  className="flex-1"
+                  />
+                  <span className="text-sm sm:text-base font-medium min-w-[2rem] text-center">{yValue}</span>
+                </div>        
+              </div>       
+              
           </div>
       </div>
     </>
