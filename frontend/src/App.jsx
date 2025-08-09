@@ -123,13 +123,13 @@ function App() {
             {/* canvas */}
             <Canvas 
               style={{backgroundColor: "rgba(0,0,0,1)", height: canvasDimensions}}
-              camera={{position: [400,50,0], fov: 60}}
+              camera={{position: [255*2,50,0], fov: 60}}
               > 
 
 
               <ambientLight intensity={0.1}/>
               
-              <directionalLight color="red" position={[300, 300, 300]} />
+              <directionalLight color="red" position={[255, 255, 255]} />
               <Cube 
                   height={cubeHeight} 
                   width={cubeWidth} 
