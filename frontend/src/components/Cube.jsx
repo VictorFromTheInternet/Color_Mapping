@@ -3,13 +3,16 @@ import React from 'react'
 function Cube({height, width, depth, ref, xRotation, yRotation, colors=[]}) {
   
   function hexToRgb(str){
-    // let R = parseInt(str.slice(1,3), 16) - (255/2)
-    // let G = parseInt(str.slice(3,5), 16) - (255/2)
-    // let B = parseInt(str.slice(5), 16) - (255/2)
     let R = parseInt(str.slice(1,3), 16) 
     let G = parseInt(str.slice(3,5), 16) 
     let B = parseInt(str.slice(5), 16) 
     // console.log(`${R}, ${G}, ${B}, ${A}`)
+    return [R,G,B]
+  }
+  function newPos(rgb){
+    let R = rgb[0] - (255/2)
+    let G = rgb[1] - (255/2)
+    let B = rgb[2] - (255/2)    
     return [R,G,B]
   }
 
@@ -33,17 +36,14 @@ function Cube({height, width, depth, ref, xRotation, yRotation, colors=[]}) {
 
         {/* colors.map */}
         {
-          colors.map((color,index)=>{            
-            const pos = hexToRgb(color)
-            console.log(pos)
-            // const colorPercent = colorToPercent(color)
+          colors.map((color,index)=>{                               
+            const rgbColor = hexToRgb(color)     
+            const pos = newPos(rgbColor)            
 
             return(              
               <mesh key={index} position={pos}>
-                <sphereGeometry args={[10, 25, 6]} />
-                {/* <meshBasicMaterial color={color.replace('#','')}  opacity={1} /> */}
-                {/* <meshBasicMaterial color={`rgb(${pos[0]}%,${pos[1]}%,${pos[2]}%)`}  opacity={1} /> */}
-                <meshBasicMaterial color={`rgb(${pos[0]},${pos[1]},${pos[2]})`}  opacity={1} />
+                <sphereGeometry args={[10, 25, 6]} />                
+                <meshBasicMaterial color={`rgb(${rgbColor[0]},${rgbColor[1]},${rgbColor[2]})`}  opacity={1} />
               </mesh>
             )
           })
