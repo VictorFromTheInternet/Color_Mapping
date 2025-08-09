@@ -143,8 +143,8 @@ function App() {
             </Canvas>  
 
             <div className="mb-4">
-                <label htmlFor="xValue" className="block text-sm sm:text-base mb-2">X:</label>
-                <div className="flex justify-between text-xs sm:text-sm text-gray-600 mb-1">
+                <label htmlFor="xValue" className="block text-sm sm:text-base my-2">X:</label>
+                <div className="flex justify-between text-xs sm:text-sm text-gray-600 mb-1 ">
                   <p>0</p>
                   <p>360</p>
                 </div>
